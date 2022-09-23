@@ -5,4 +5,4 @@ Where You can add some of the notes online
 ![alt text](https://github.com/karnmodi/StickyNote/blob/main/Sticky%20Note.png)
 
 ## Developer
-* Karan Modi 
+* Karan Falgun Modi 
