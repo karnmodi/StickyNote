@@ -1,0 +1,230 @@
+:root {
+  --bg: #eef2f7;
+  --bg-elevated: #ffffff;
+  --fg: #1a1f29;
+  --fg-muted: #5a6473;
+  --border: rgba(0, 0, 0, 0.1);
+  --accent: #1576b7;
+  --accent-fg: #ffffff;
+  --danger: #c0392b;
+  --shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  --shadow-elev: 0 10px 28px rgba(0, 0, 0, 0.18);
+  --radius: 12px;
+  --tag-bg: rgba(0, 0, 0, 0.08);
+}
+
+:root[data-theme="dark"],
+:root[data-theme=""] {
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme=""] {
+    --bg: #161a22;
+    --bg-elevated: #20262f;
+    --fg: #eef0f3;
+    --fg-muted: #a6adb8;
+    --border: rgba(255, 255, 255, 0.1);
+    --shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+    --shadow-elev: 0 10px 28px rgba(0, 0, 0, 0.7);
+    --tag-bg: rgba(255, 255, 255, 0.12);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #161a22;
+  --bg-elevated: #20262f;
+  --fg: #eef0f3;
+  --fg-muted: #a6adb8;
+  --border: rgba(255, 255, 255, 0.1);
+  --shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  --shadow-elev: 0 10px 28px rgba(0, 0, 0, 0.7);
+  --tag-bg: rgba(255, 255, 255, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.btn {
+  background: var(--bg-elevated);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.05s;
+}
+
+.btn:hover:not([disabled]) {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+.btn[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-color: transparent;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.icon-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.icon-btn.active {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.icon-btn.danger:hover {
+  background: var(--danger);
+  color: white;
+}
+
+.select,
+.search-input,
+.modal-input {
+  background: var(--bg-elevated);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 420px;
+}
+
+.tag {
+  background: var(--tag-bg);
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 0.85em;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--bg-elevated);
+  color: var(--fg);
+  padding: 20px;
+  border-radius: var(--radius);
+  width: min(420px, 90vw);
+  box-shadow: var(--shadow-elev);
+}
+
+.modal h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.modal label {
+  display: block;
+  font-size: 13px;
+  color: var(--fg-muted);
+  margin-bottom: 6px;
+}
+
+.modal-input {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.menu-item {
+  background: transparent;
+  border: none;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--fg);
+}
+
+.menu-item:hover {
+  background: var(--bg);
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--fg-muted);
+  padding: 60px 20px;
+}
+
+.toast-host {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 900;
+}
+
+.toast {
+  background: var(--bg-elevated);
+  color: var(--fg);
+  padding: 10px 14px;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  border-left: 3px solid var(--accent);
+}
+
+.toast.error {
+  border-left-color: var(--danger);
+}
