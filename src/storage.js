@@ -1,8 +1,9 @@
-import { createNote, validateNote } from "./model.js";
+import { createNote, validateNote, validateFolder } from "./model.js";
 
 const KEYS = {
   notes: "stickynote.v2.notes",
   archive: "stickynote.v2.archive",
+  folders: "stickynote.v2.folders",
   settings: "stickynote.v2.settings",
   meta: "stickynote.v2.meta",
 };
@@ -11,7 +12,6 @@ const SCHEMA_VERSION = 2;
 
 export const DEFAULT_SETTINGS = {
   theme: "auto",
-  layoutMode: "grid",
   sortBy: "manual",
   encryptionEnabled: false,
   salt: null,
@@ -87,6 +87,16 @@ export function loadArchive() {
 
 export function saveArchive(notes) {
   return writeJson(KEYS.archive, notes);
+}
+
+export function loadFolders() {
+  const raw = readJson(KEYS.folders, []);
+  if (!Array.isArray(raw)) return [];
+  return raw.map(validateFolder).filter(Boolean);
+}
+
+export function saveFolders(folders) {
+  return writeJson(KEYS.folders, folders);
 }
 
 export function clearAll() {

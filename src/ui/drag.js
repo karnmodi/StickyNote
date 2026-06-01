@@ -1,10 +1,9 @@
-import { reorderNotes, updateNote, getState } from "../state.js";
+import { reorderNotes, updateNote } from "../state.js";
 
 export function makeReorderable(noteEl, boardEl) {
   const handle = noteEl.querySelector(".note-drag-handle");
   if (!handle) return;
   handle.addEventListener("pointerdown", (e) => {
-    if (getState().settings.layoutMode !== "grid") return;
     e.preventDefault();
     noteEl.classList.add("dragging");
     const move = (ev) => {
@@ -22,39 +21,6 @@ export function makeReorderable(noteEl, boardEl) {
       window.removeEventListener("pointerup", up);
       const ids = [...boardEl.querySelectorAll(".note-card")].map((n) => n.dataset.id);
       reorderNotes(ids);
-    };
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", up);
-  });
-}
-
-export function makeCanvasDraggable(noteEl) {
-  const handle = noteEl.querySelector(".note-drag-handle");
-  if (!handle) return;
-  handle.addEventListener("pointerdown", (e) => {
-    if (getState().settings.layoutMode !== "canvas") return;
-    e.preventDefault();
-    const id = noteEl.dataset.id;
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const rect = noteEl.getBoundingClientRect();
-    const parentRect = noteEl.parentElement.getBoundingClientRect();
-    const startLeft = rect.left - parentRect.left + noteEl.parentElement.scrollLeft;
-    const startTop = rect.top - parentRect.top + noteEl.parentElement.scrollTop;
-    noteEl.classList.add("dragging");
-    const move = (ev) => {
-      const x = Math.max(0, startLeft + (ev.clientX - startX));
-      const y = Math.max(0, startTop + (ev.clientY - startY));
-      noteEl.style.left = x + "px";
-      noteEl.style.top = y + "px";
-    };
-    const up = () => {
-      noteEl.classList.remove("dragging");
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", up);
-      const x = parseInt(noteEl.style.left, 10) || 0;
-      const y = parseInt(noteEl.style.top, 10) || 0;
-      updateNote(id, { position: { x, y } }, { silent: true });
     };
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);

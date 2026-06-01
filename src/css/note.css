@@ -11,14 +11,24 @@
   position: relative;
 }
 
-.note-card:focus,
+.note-card:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent), var(--shadow-elev);
+}
+
 .note-card:focus-within {
   box-shadow: var(--shadow-elev);
 }
 
-.note-card.pinned {
-  outline: 2px solid var(--accent);
-  outline-offset: -2px;
+.note-card.pinned::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  z-index: 2;
 }
 
 .note-card.dragging {
@@ -30,16 +40,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 8px;
+  padding: 4px 6px;
   background: rgba(0, 0, 0, 0.06);
 }
 
 .note-drag-handle {
   cursor: grab;
-  font-weight: bold;
-  user-select: none;
-  padding: 2px 6px;
+  display: inline-flex;
+  padding: 4px 4px;
   color: rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+}
+
+.note-drag-handle:hover {
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .note-drag-handle:active {
@@ -49,8 +63,22 @@
 .note-controls {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 0;
   position: relative;
+}
+
+.note-controls .icon-btn {
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.note-controls .icon-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.note-controls .icon-btn.active {
+  color: var(--accent);
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .note-body {
@@ -145,7 +173,7 @@
   background: rgba(0, 0, 0, 0.12);
   color: inherit;
   border: none;
-  padding: 2px 8px 2px 8px;
+  padding: 2px 8px;
   border-radius: 999px;
   font-size: 11px;
   cursor: pointer;
@@ -174,9 +202,32 @@
   cursor: pointer;
 }
 
-.note-due {
+.note-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
   font-size: 11px;
   color: rgba(0, 0, 0, 0.6);
+}
+
+.note-folder,
+.note-due {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.note-folder .icon,
+.note-due .icon {
+  width: 12px;
+  height: 12px;
+}
+
+.note-folder .icon svg,
+.note-due .icon svg {
+  width: 12px;
+  height: 12px;
 }
 
 .color-palette {
