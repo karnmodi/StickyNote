@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1576b7" />
     <title>Sticky Notes</title>
-    <link rel="stylesheet" href = "src/main.css">
-    <script src="src/main.js" defer></script>
-</head>
-<body>
-    <div id = "app">
-        <button class = "add-note" type = "button">+</button>
-        
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="src/css/base.css" />
+    <link rel="stylesheet" href="src/css/layout.css" />
+    <link rel="stylesheet" href="src/css/note.css" />
+    <script type="module" src="src/main.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header id="toolbar" class="toolbar"></header>
+      <main id="board"></main>
     </div>
-    <p> Double click on Sticky Note to DELETE </p>
-    
-    
-</body>
+    <div id="toast-host" class="toast-host"></div>
+  </body>
 </html>

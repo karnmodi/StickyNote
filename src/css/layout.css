@@ -1,0 +1,80 @@
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow);
+}
+
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-search {
+  flex: 1;
+  justify-content: center;
+  min-width: 240px;
+}
+
+.tag-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 20px 0;
+}
+
+.tag-filter-bar .tag-chip {
+  background: var(--tag-bg);
+  color: var(--fg);
+  border: none;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.tag-filter-bar .tag-chip.active {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+.board {
+  flex: 1;
+  padding: 20px;
+}
+
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.board-canvas {
+  position: relative;
+  min-height: 80vh;
+  background-image: radial-gradient(var(--border) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.board-canvas .note-card {
+  position: absolute;
+}
+
+.board-canvas .note-card:not(.canvas-positioned) {
+  position: static;
+}

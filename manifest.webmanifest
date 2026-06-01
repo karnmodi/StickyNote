@@ -1,0 +1,18 @@
+{
+  "name": "Sticky Notes",
+  "short_name": "StickyNote",
+  "description": "Local-first sticky notes that live in your browser.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eef2f7",
+  "theme_color": "#1576b7",
+  "icons": [
+    {
+      "src": "Sticky Note.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

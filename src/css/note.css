@@ -1,0 +1,208 @@
+.note-card {
+  background: #fef3a3;
+  color: #1a1f29;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow 0.15s, transform 0.05s;
+  outline: none;
+  position: relative;
+}
+
+.note-card:focus,
+.note-card:focus-within {
+  box-shadow: var(--shadow-elev);
+}
+
+.note-card.pinned {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.note-card.dragging {
+  opacity: 0.7;
+  transform: rotate(-1.5deg);
+}
+
+.note-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.note-drag-handle {
+  cursor: grab;
+  font-weight: bold;
+  user-select: none;
+  padding: 2px 6px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.note-drag-handle:active {
+  cursor: grabbing;
+}
+
+.note-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  position: relative;
+}
+
+.note-body {
+  position: relative;
+  resize: both;
+  overflow: auto;
+  min-width: 180px;
+  min-height: 140px;
+  padding: 10px 12px;
+}
+
+.note-textarea,
+.note-preview {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  outline: none;
+  color: inherit;
+  resize: none;
+  line-height: 1.4;
+}
+
+.note-textarea[disabled] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.note-preview {
+  overflow: auto;
+}
+
+.note-preview h1,
+.note-preview h2,
+.note-preview h3 {
+  margin: 0.3em 0;
+}
+
+.note-preview p {
+  margin: 0.3em 0;
+}
+
+.note-preview ul,
+.note-preview ol {
+  margin: 0.3em 0;
+  padding-left: 1.4em;
+}
+
+.note-preview ul.checklist {
+  list-style: none;
+  padding-left: 0;
+}
+
+.note-preview ul.checklist label {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  cursor: pointer;
+}
+
+.note-preview code {
+  background: rgba(0, 0, 0, 0.08);
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+
+.note-preview a {
+  color: var(--accent);
+}
+
+.note-footer {
+  padding: 6px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.note-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.note-tags .tag-chip {
+  background: rgba(0, 0, 0, 0.12);
+  color: inherit;
+  border: none;
+  padding: 2px 8px 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tag-remove {
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.tag-add {
+  background: transparent;
+  border: 1px dashed rgba(0, 0, 0, 0.3);
+  color: rgba(0, 0, 0, 0.55);
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.note-due {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.color-palette {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px;
+  display: grid;
+  grid-template-columns: repeat(4, 22px);
+  gap: 4px;
+  box-shadow: var(--shadow-elev);
+  z-index: 10;
+}
+
+.color-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+
+.note-card.encrypted .note-body {
+  filter: contrast(0.9);
+}
