@@ -23,16 +23,33 @@ export function createNote(partial = {}) {
     tags: Array.isArray(partial.tags) ? [...partial.tags] : [],
     pinned: !!partial.pinned,
     archived: !!partial.archived,
+    folderId: partial.folderId ?? null,
     createdAt: partial.createdAt ?? now,
     updatedAt: partial.updatedAt ?? now,
     dueAt: partial.dueAt ?? null,
     reminded: !!partial.reminded,
-    position: partial.position ?? null,
     size: partial.size ? { ...DEFAULT_SIZE, ...partial.size } : { ...DEFAULT_SIZE },
     order: typeof partial.order === "number" ? partial.order : Date.now(),
     encrypted: !!partial.encrypted,
     ciphertext: partial.ciphertext ?? null,
   };
+}
+
+export function createFolder(partial = {}) {
+  const now = new Date().toISOString();
+  return {
+    id: partial.id ?? uuid(),
+    name: String(partial.name ?? "Untitled").slice(0, 60),
+    createdAt: partial.createdAt ?? now,
+    order: typeof partial.order === "number" ? partial.order : Date.now(),
+  };
+}
+
+export function validateFolder(value) {
+  if (!value || typeof value !== "object") return null;
+  if (typeof value.id !== "string" || !value.id) return null;
+  if (typeof value.name !== "string" || !value.name) return null;
+  return createFolder(value);
 }
 
 export function validateNote(value) {

@@ -12,7 +12,14 @@ import {
   replaceAll,
 } from "./state.js";
 import { renderBoard } from "./ui/board.js";
-import { renderToolbar, focusSearch, applyTheme } from "./ui/toolbar.js";
+import {
+  renderToolbar,
+  focusSearch,
+  applyTheme,
+  cycleTheme,
+  openShortcutsHelp,
+} from "./ui/toolbar.js";
+import { renderSidebar } from "./ui/sidebar.js";
 import { installShortcuts } from "./features/shortcuts.js";
 import { startReminders } from "./features/reminders.js";
 import { openModal, closeModal } from "./ui/modal.js";
@@ -20,6 +27,7 @@ import { el } from "./utils/dom.js";
 import { unlock, decryptString } from "./features/encryption.js";
 
 const toolbarRoot = document.getElementById("toolbar");
+const sidebarRoot = document.getElementById("sidebar");
 const boardRoot = document.getElementById("board");
 const toastHost = document.getElementById("toast-host");
 
@@ -31,8 +39,28 @@ function showToast(message, kind = "info") {
 
 function render() {
   const state = getState();
+  const prevFocused = document.activeElement;
+  const focusedNoteId = state.ui.focusedNoteId;
+  const focusedFolderId =
+    prevFocused?.classList?.contains("sidebar-item") && prevFocused.dataset?.folderId
+      ? prevFocused.dataset.folderId
+      : null;
+  const wasOnSidebar = prevFocused?.classList?.contains("sidebar-item");
+
   renderToolbar(toolbarRoot, state);
+  renderSidebar(sidebarRoot, state);
   renderBoard(boardRoot, state);
+
+  if (focusedNoteId) {
+    const card = document.querySelector(`.note-card[data-id="${focusedNoteId}"]`);
+    if (card) card.focus();
+  } else if (focusedFolderId) {
+    const item = document.querySelector(`.sidebar-item[data-folder-id="${focusedFolderId}"]`);
+    if (item) item.focus();
+  } else if (wasOnSidebar) {
+    const items = document.querySelectorAll(".sidebar-item.active");
+    if (items[0]) items[0].focus();
+  }
 }
 
 async function decryptAllAndMark() {
@@ -60,7 +88,10 @@ function buildUnlockUi(settings) {
     class: "modal-input",
     placeholder: "Password",
   });
-  const error = el("div", { class: "modal-error", style: { color: "var(--danger)", fontSize: "12px", marginTop: "6px" } });
+  const error = el("div", {
+    class: "modal-error",
+    style: { color: "var(--danger)", fontSize: "12px", marginTop: "6px" },
+  });
 
   const tryUnlock = async () => {
     error.textContent = "";
@@ -71,7 +102,6 @@ function buildUnlockUi(settings) {
     }
     try {
       await unlock(pw, settings.salt);
-      // Try decrypting one ciphertext to verify
       const { notes } = getState();
       const sample = notes.find((n) => n.encrypted && n.ciphertext);
       if (sample) {
@@ -96,9 +126,13 @@ function buildUnlockUi(settings) {
   });
 
   openModal({
-    title: "🔒 Unlock your notes",
+    title: "Unlock your notes",
     body: el("div", {}, [
-      el("p", { style: { marginTop: 0 } }, "Enter the password you set to view your encrypted notes."),
+      el(
+        "p",
+        { style: { marginTop: 0 } },
+        "Enter the password you set to view your encrypted notes.",
+      ),
       passwordInput,
       error,
     ]),
@@ -140,6 +174,8 @@ async function boot() {
   subscribe(render);
   installShortcuts({
     onSearch: focusSearch,
+    onTheme: cycleTheme,
+    onHelp: openShortcutsHelp,
   });
   startReminders();
 

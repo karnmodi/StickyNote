@@ -1,4 +1,4 @@
-const CACHE = "stickynote-v2-shell";
+const CACHE = "stickynote-v3-shell";
 const SHELL = [
   "./",
   "./index.html",
@@ -24,8 +24,10 @@ const SHELL = [
   "./src/ui/board.js",
   "./src/ui/note.js",
   "./src/ui/toolbar.js",
+  "./src/ui/sidebar.js",
   "./src/ui/modal.js",
   "./src/ui/drag.js",
+  "./src/ui/icons.js",
 ];
 
 self.addEventListener("install", (event) => {
