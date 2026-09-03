@@ -1,4 +1,4 @@
-const CACHE = "stickynote-v3-shell";
+const CACHE = "stickynote-v4-shell";
 const SHELL = [
   "./",
   "./index.html",
@@ -7,27 +7,33 @@ const SHELL = [
   "./src/storage.js",
   "./src/state.js",
   "./src/model.js",
+  "./src/session.js",
   "./src/css/base.css",
   "./src/css/layout.css",
-  "./src/css/note.css",
+  "./src/css/card.css",
+  "./src/css/sheet.css",
   "./src/utils/uuid.js",
   "./src/utils/dom.js",
   "./src/utils/debounce.js",
   "./src/utils/sanitize.js",
   "./src/features/markdown.js",
   "./src/features/checklist.js",
+  "./src/features/noteType.js",
   "./src/features/search.js",
   "./src/features/shortcuts.js",
   "./src/features/reminders.js",
   "./src/features/encryption.js",
   "./src/features/backup.js",
   "./src/ui/board.js",
-  "./src/ui/note.js",
+  "./src/ui/card.js",
+  "./src/ui/sheet.js",
+  "./src/ui/composer.js",
   "./src/ui/toolbar.js",
   "./src/ui/sidebar.js",
   "./src/ui/modal.js",
   "./src/ui/drag.js",
   "./src/ui/icons.js",
+  "./src/ui/toast.js",
 ];
 
 self.addEventListener("install", (event) => {
@@ -40,9 +46,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) =>
-        Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))),
-      )
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });

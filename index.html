@@ -3,12 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#1576b7" />
-    <title>Sticky Notes</title>
+    <meta name="theme-color" content="#f5f5f7" />
+    <title>Notes</title>
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="stylesheet" href="src/css/base.css" />
     <link rel="stylesheet" href="src/css/layout.css" />
-    <link rel="stylesheet" href="src/css/note.css" />
+    <link rel="stylesheet" href="src/css/card.css" />
+    <link rel="stylesheet" href="src/css/sheet.css" />
     <script type="module" src="src/main.js"></script>
   </head>
   <body>
@@ -17,6 +18,9 @@
       <aside id="sidebar" class="sidebar"></aside>
       <main id="board"></main>
     </div>
+    <!-- The sheet mounts here, outside the re-rendered tree, so an edit in
+         progress is never destroyed by a board re-render. -->
+    <div id="sheet-host"></div>
     <div id="toast-host" class="toast-host"></div>
   </body>
 </html>
