@@ -1,27 +1,63 @@
-import { addNote, undo, redo } from "../state.js";
+import { undo, redo, getState, updateNote, deleteNote, undeleteNote } from "../state.js";
+import { isSheetOpen, closeSheet, openSheet } from "../ui/sheet.js";
+import { focusComposer } from "../ui/composer.js";
+import { showToast } from "../ui/toast.js";
 
-function isInField(target) {
-  if (!target) return false;
-  if (target.isContentEditable) return true;
-  const tag = target.tagName;
-  if (tag === "TEXTAREA") return true;
-  if (tag === "INPUT" && target.type !== "checkbox" && target.type !== "button") return true;
+function isInField(t) {
+  if (!t) return false;
+  if (t.isContentEditable) return true;
+  if (t.tagName === "TEXTAREA") return true;
+  if (t.tagName === "SELECT") return true;
+  if (t.tagName === "INPUT" && t.type !== "checkbox" && t.type !== "button") return true;
   return false;
 }
 
-function focusFirstNote() {
-  const card = document.querySelector(".note-card");
-  if (card) card.focus();
-  return !!card;
+function focusedCard() {
+  const a = document.activeElement;
+  return a && a.classList?.contains("note-card") && !a.classList.contains("draft") ? a : null;
 }
 
-export function installShortcuts({ onSearch, onNew, onHelp, onTheme } = {}) {
+function moveFocus(card, key) {
+  const cards = [...document.querySelectorAll(".note-card:not(.draft)")];
+  const i = cards.indexOf(card);
+  if (i === -1 || cards.length < 2) return;
+  const rect = card.getBoundingClientRect();
+  if (key === "ArrowRight" || key === "ArrowLeft") {
+    const dir = key === "ArrowRight" ? 1 : -1;
+    for (let j = i + dir; j >= 0 && j < cards.length; j += dir) {
+      const r = cards[j].getBoundingClientRect();
+      if (Math.abs(r.top - rect.top) < 20) return cards[j].focus();
+    }
+    return;
+  }
+  const dir = key === "ArrowDown" ? 1 : -1;
+  let best = null;
+  let bestDist = Infinity;
+  for (let j = 0; j < cards.length; j++) {
+    if (j === i) continue;
+    const r = cards[j].getBoundingClientRect();
+    if (dir === 1 ? r.top <= rect.top : r.top >= rect.top) continue;
+    const d = Math.abs(r.left - rect.left) + Math.abs(r.top - rect.top) * 2;
+    if (d < bestDist) {
+      bestDist = d;
+      best = cards[j];
+    }
+  }
+  best?.focus();
+}
+
+export function installShortcuts({ onSearch, onHelp, onTheme } = {}) {
   window.addEventListener("keydown", (e) => {
     const mod = e.ctrlKey || e.metaKey;
     const target = e.target;
     const inField = isInField(target);
 
     if (e.key === "Escape") {
+      // Sheet first, then any modal, then blur.
+      if (isSheetOpen()) {
+        closeSheet();
+        return;
+      }
       const backdrop = document.querySelector(".modal-backdrop");
       if (backdrop) {
         backdrop.remove();
@@ -43,67 +79,83 @@ export function installShortcuts({ onSearch, onNew, onHelp, onTheme } = {}) {
       redo();
       return;
     }
-
     if (mod && (e.key === "n" || e.key === "N")) {
       e.preventDefault();
-      const note = addNote();
-      setTimeout(() => {
-        const card = document.querySelector(`.note-card[data-id="${note.id}"]`);
-        if (card) {
-          card.focus();
-          const ta = card.querySelector(".note-textarea");
-          if (ta) ta.focus();
-        }
-      }, 0);
+      focusComposer();
       return;
     }
     if (mod && (e.key === "f" || e.key === "F")) {
       e.preventDefault();
-      if (typeof onSearch === "function") onSearch();
+      onSearch?.();
       return;
     }
 
-    if (inField) return;
+    if (inField || isSheetOpen()) return;
+
+    const card = focusedCard();
 
     if (e.key === "/") {
       e.preventDefault();
-      if (typeof onSearch === "function") onSearch();
+      onSearch?.();
       return;
     }
     if (e.key === "?") {
       e.preventDefault();
-      if (typeof onHelp === "function") onHelp();
+      onHelp?.();
       return;
     }
     if (e.key === "n" || e.key === "N") {
       e.preventDefault();
-      const note = addNote();
-      setTimeout(() => {
-        const card = document.querySelector(`.note-card[data-id="${note.id}"]`);
-        if (card) {
-          card.focus();
-          const ta = card.querySelector(".note-textarea");
-          if (ta) ta.focus();
-        }
-      }, 0);
+      focusComposer();
       return;
     }
     if (e.key === "t" || e.key === "T") {
       e.preventDefault();
-      if (typeof onTheme === "function") onTheme();
+      onTheme?.();
       return;
     }
-    if (e.key === "j" || e.key === "ArrowDown") {
-      if (target === document.body || target === document.documentElement) {
-        e.preventDefault();
-        focusFirstNote();
+
+    if (!card) {
+      if (["ArrowDown", "ArrowUp", "j", "k"].includes(e.key)) {
+        const first = document.querySelector(".note-card:not(.draft)");
+        if (first) {
+          e.preventDefault();
+          first.focus();
+        }
       }
+      return;
     }
-    if (e.key === "k" || e.key === "ArrowUp") {
-      if (target === document.body || target === document.documentElement) {
-        e.preventDefault();
-        focusFirstNote();
+
+    const id = card.dataset.id;
+
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openSheet(id);
+      return;
+    }
+    if (e.key === "p" || e.key === "P") {
+      e.preventDefault();
+      const note = getState().notes.find((n) => n.id === id);
+      if (note) updateNote(id, { pinned: !note.pinned });
+      return;
+    }
+    if (e.key === "Delete" || e.key === "Backspace") {
+      e.preventDefault();
+      if (getState().ui.view === "trash") return;
+      const note = deleteNote(id);
+      if (note) {
+        showToast("Note deleted", {
+          actionLabel: "Undo",
+          key: "delete",
+          duration: 6000,
+          onAction: () => undeleteNote(id),
+        });
       }
+      return;
+    }
+    if (["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+      e.preventDefault();
+      moveFocus(card, e.key);
     }
   });
 }
