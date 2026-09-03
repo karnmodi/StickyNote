@@ -1,66 +1,38 @@
 import { el, clear } from "../utils/dom.js";
-import { icon, iconButton } from "./icons.js";
-import {
-  setUi,
-  addFolder,
-  renameFolder,
-  deleteFolder,
-  moveNoteToFolder,
-  getState,
-} from "../state.js";
+import { icon } from "./icons.js";
+import { setUi, addFolder, renameFolder, deleteFolder, getState } from "../state.js";
 import { promptModal, confirmModal } from "./modal.js";
+import { SESSION_ID } from "../session.js";
 
 let folderInputRef = null;
 
-export function focusSidebarNewFolder() {
-  if (folderInputRef) {
-    folderInputRef.focus();
-    folderInputRef.select?.();
-  }
+export function focusNewFolder() {
+  folderInputRef?.focus();
 }
 
-export function focusFirstFolderItem() {
-  const first = document.querySelector(".sidebar-item");
-  if (first) first.focus();
-}
-
-function buildItem({ label, count, iconName, active, view, folderId, onActivate, onRename, onDelete }) {
-  const item = el("button", {
+function item({ label, count, iconName, active, folderId, view, onActivate, onRename, onDelete }) {
+  const node = el("button", {
     type: "button",
     class: `sidebar-item ${active ? "active" : ""}`,
-    tabindex: "0",
-    dataset: folderId ? { folderId } : view ? { view } : {},
+    dataset: { ...(folderId ? { folderId } : {}), ...(view ? { view } : {}) },
   });
-  item.appendChild(icon(iconName));
-  item.appendChild(el("span", { class: "sidebar-label" }, label));
+  node.appendChild(icon(iconName));
+  node.appendChild(el("span", { class: "sidebar-label" }, label));
   if (typeof count === "number") {
-    item.appendChild(el("span", { class: "sidebar-count" }, String(count)));
+    node.appendChild(el("span", { class: "sidebar-count" }, String(count)));
   }
-  item.addEventListener("click", onActivate);
-  item.addEventListener("dragover", (e) => {
-    if (e.dataTransfer.types.includes("application/x-stickynote-id")) {
-      e.preventDefault();
-      item.classList.add("drop-target");
-    }
-  });
-  item.addEventListener("dragleave", () => item.classList.remove("drop-target"));
-  item.addEventListener("drop", (e) => {
-    const noteId = e.dataTransfer.getData("application/x-stickynote-id");
-    item.classList.remove("drop-target");
-    if (noteId) moveNoteToFolder(noteId, folderId || null);
-  });
-  item.addEventListener("keydown", (e) => {
+  node.addEventListener("click", onActivate);
+  node.addEventListener("keydown", (e) => {
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       e.preventDefault();
       const all = [...document.querySelectorAll(".sidebar-item")];
-      const idx = all.indexOf(item);
-      const nextIdx = e.key === "ArrowDown" ? idx + 1 : idx - 1;
-      const next = all[Math.max(0, Math.min(all.length - 1, nextIdx))];
-      if (next) next.focus();
+      const i = all.indexOf(node);
+      const next = all[Math.max(0, Math.min(all.length - 1, e.key === "ArrowDown" ? i + 1 : i - 1))];
+      next?.focus();
     } else if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       onActivate();
-    } else if ((e.key === "F2" || e.key === "r") && onRename) {
+    } else if (e.key === "F2" && onRename) {
       e.preventDefault();
       onRename();
     } else if ((e.key === "Delete" || e.key === "Backspace") && onDelete) {
@@ -68,74 +40,68 @@ function buildItem({ label, count, iconName, active, view, folderId, onActivate,
       onDelete();
     }
   });
-  return item;
+  return node;
 }
 
 export function renderSidebar(root, state) {
   clear(root);
 
-  const counts = {
-    all: state.notes.length,
-    archive: state.archive.length,
-    none: state.notes.filter((n) => !n.folderId).length,
-  };
+  const sessionCount = state.notes.filter((n) => n.sessionId === SESSION_ID || n.pinned).length;
   const perFolder = new Map();
-  for (const note of state.notes) {
-    if (!note.folderId) continue;
-    perFolder.set(note.folderId, (perFolder.get(note.folderId) || 0) + 1);
+  for (const n of state.notes) {
+    if (n.folderId) perFolder.set(n.folderId, (perFolder.get(n.folderId) || 0) + 1);
   }
 
-  const header = el(
-    "div",
-    { class: "sidebar-header" },
-    [el("span", { class: "sidebar-title" }, "Folders")],
-  );
-  root.appendChild(header);
-
-  const list = el("div", { class: "sidebar-list", role: "listbox" });
+  const list = el("div", { class: "sidebar-list" });
 
   list.appendChild(
-    buildItem({
-      label: "All notes",
-      count: counts.all,
+    item({
+      label: "This session",
+      count: sessionCount,
       iconName: "inbox",
-      active: state.ui.view === "notes" && state.ui.activeFolderId === null,
-      view: "all",
-      onActivate: () => setUi({ view: "notes", activeFolderId: null }),
+      active: state.ui.view === "session",
+      view: "session",
+      onActivate: () => setUi({ view: "session", activeFolderId: null, search: "" }),
     }),
   );
-
   list.appendChild(
-    buildItem({
+    item({
+      label: "All notes",
+      count: state.notes.length,
+      iconName: "text",
+      active: state.ui.view === "all",
+      view: "all",
+      onActivate: () => setUi({ view: "all", activeFolderId: null }),
+    }),
+  );
+  list.appendChild(
+    item({
       label: "Unfiled",
-      count: counts.none,
+      count: state.notes.filter((n) => !n.folderId).length,
       iconName: "folder",
-      active: state.ui.view === "notes" && state.ui.activeFolderId === "__unfiled__",
+      active: state.ui.view === "folder" && state.ui.activeFolderId === "__unfiled__",
       view: "unfiled",
-      onActivate: () => setUi({ view: "notes", activeFolderId: "__unfiled__" }),
+      onActivate: () => setUi({ view: "folder", activeFolderId: "__unfiled__" }),
     }),
   );
 
   const folders = [...state.folders].sort((a, b) => (a.order || 0) - (b.order || 0));
+  if (folders.length) list.appendChild(el("div", { class: "sidebar-divider" }));
   for (const folder of folders) {
     list.appendChild(
-      buildItem({
+      item({
         label: folder.name,
         count: perFolder.get(folder.id) || 0,
         iconName: "folder",
-        active: state.ui.view === "notes" && state.ui.activeFolderId === folder.id,
+        active: state.ui.view === "folder" && state.ui.activeFolderId === folder.id,
         folderId: folder.id,
-        onActivate: () => setUi({ view: "notes", activeFolderId: folder.id }),
+        onActivate: () => setUi({ view: "folder", activeFolderId: folder.id }),
         onRename: async () => {
-          const next = await promptModal({
-            title: "Rename folder",
-            label: "New name",
-            initial: folder.name,
-          });
+          const next = await promptModal({ title: "Rename folder", label: "Name", initial: folder.name });
           if (next && next.trim()) renameFolder(folder.id, next.trim());
         },
         onDelete: async () => {
-          if (await confirmModal(`Delete folder "${folder.name}"? Notes inside become Unfiled.`)) {
+          if (await confirmModal(`Delete "${folder.name}"? Notes inside become Unfiled.`)) {
             deleteFolder(folder.id);
           }
         },
@@ -145,42 +111,40 @@ export function renderSidebar(root, state) {
 
   list.appendChild(el("div", { class: "sidebar-divider" }));
   list.appendChild(
-    buildItem({
-      label: "Archive",
-      count: counts.archive,
-      iconName: "archive",
-      active: state.ui.view === "archive",
-      view: "archive",
-      onActivate: () => setUi({ view: "archive" }),
+    item({
+      label: "Recently deleted",
+      count: state.trash.length,
+      iconName: "trash",
+      active: state.ui.view === "trash",
+      view: "trash",
+      onActivate: () => setUi({ view: "trash", activeFolderId: null }),
     }),
   );
 
   root.appendChild(list);
 
-  const newFolderForm = el("form", { class: "sidebar-new" });
-  const newFolderInput = el("input", {
+  const form = el("form", { class: "sidebar-new" });
+  const input = el("input", {
     type: "text",
     class: "sidebar-new-input",
-    placeholder: "New folder…",
+    placeholder: "New folder",
     "aria-label": "New folder name",
     maxlength: "60",
   });
-  folderInputRef = newFolderInput;
-  newFolderForm.appendChild(icon("folderPlus"));
-  newFolderForm.appendChild(newFolderInput);
-  newFolderForm.addEventListener("submit", (e) => {
+  folderInputRef = input;
+  form.appendChild(icon("folderPlus"));
+  form.appendChild(input);
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const name = newFolderInput.value.trim();
+    const name = input.value.trim();
     if (!name) return;
     const folder = addFolder(name);
-    newFolderInput.value = "";
-    setUi({ view: "notes", activeFolderId: folder.id });
+    input.value = "";
+    setUi({ view: "folder", activeFolderId: folder.id });
   });
-  root.appendChild(newFolderForm);
+  root.appendChild(form);
 
-  const help = el("div", { class: "sidebar-help" }, [
-    el("kbd", {}, "?"),
-    el("span", {}, " for shortcuts"),
-  ]);
-  root.appendChild(help);
+  root.appendChild(
+    el("div", { class: "sidebar-help" }, [el("kbd", {}, "?"), el("span", {}, "shortcuts")]),
+  );
 }
